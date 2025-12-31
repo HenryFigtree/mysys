@@ -1,17 +1,18 @@
 pub struct Table {
     columns: Vec<Vec<String>>,
     col_widths: Vec<usize>,
+    headers: Vec<(String, usize)>,
 }
 
 impl Table {
     //New table
-    pub fn new(columns: Vec<Vec<String>>) -> Self {
+    pub fn new(columns: Vec<Vec<String>>, headers: Vec<(String, usize)>) -> Self {
         let col_widths = columns
             .iter()
             .map(|col| col.iter().map(|s| s.len()).max().unwrap_or(0))
             .collect();
 
-        Table{columns, col_widths}
+        Table{columns, col_widths, headers}
     }
 
     //print table
@@ -23,6 +24,26 @@ impl Table {
         //
         //Print the table
         //
+
+        //Print Headers
+            let col_sum: usize = self.col_widths.iter().sum();
+            let table_len = col_sum + self.columns.len() * 2 + max_row%2;
+
+            println!("+{}+", "-".repeat(table_len));
+            
+            let mut cursor = 0;
+            for (header, &span) in self.headers.iter().map(|(h,s)| (h,s)) {
+                let hcols: usize = self.col_widths[cursor .. cursor + span].iter().map(|w| w + 2).sum();
+                print!("|");
+                print!(" {} ", center(header, hcols - 1));
+
+                cursor += span;
+            }
+            println!("|");
+            println!("+{}+", "-".repeat(table_len));
+
+
+        //Print the columns
         for row in 0..max_row {
             for (col_i, column) in self.columns.iter().enumerate() {
                 let cell = column.get(row).map(|s| s.as_str()).unwrap_or("");

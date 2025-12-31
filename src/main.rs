@@ -41,14 +41,15 @@ fn main() {
     //Run cpu module if checked usage passed
     //
     let mut table_items: Vec<Vec<String>> = Vec::new();
+    let mut headers: Vec<(String, usize)> = Vec::new();
 
     match args[1].as_str() {
         
         "cpu" => {
             
-            square("CPU usage", 15);
-        
             //Global CPU usage
+
+            let header = (String::from("CPU Usage"), 2);
 
             let usages: Vec<String> = mysys::cpu::get_cpu_usages()
                 .iter().map(|c| format!("{:.2}", c)).collect();
@@ -65,7 +66,9 @@ fn main() {
 
             table_items.push(cpus);
             table_items.push(usages);
-            Table::new(table_items).print();
+            headers.push(header);
+
+            Table::new(table_items, headers).print();
 
         }
 
