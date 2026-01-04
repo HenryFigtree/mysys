@@ -1,10 +1,12 @@
-// Modify this so it can interact with the modules you set earlier
+//Light System monitor 
 //
 //
 
 mod mysys;
 mod table;
 
+use sysinfo::{System, RefreshKind, CpuRefreshKind};
+use std::{thread, time::Duration, process::exit};
 use std::env::args;
 use table::Table;
 
@@ -24,63 +26,66 @@ fn main() {
     //
     //Check usage
     //
-    if let Some(command) = args.get(1) {
-
-        if args.len() > 2 {
-            println!("Unknown option {} or too many options. Usage mysys cpu", command);
-            return;
-        }
-    }
     
-    else {
-        println!("Usage: mysys cpu");
+    if args.len() < 2 {
+        println!("Usage: mysys [cpu]");
         return;
     }
     
+
     //
-    //Run cpu module if checked usage passed
+    //Add a new System
     //
-    let mut table_items: Vec<Vec<String>> = Vec::new();
+    let mut sys = System::new();
+    //Add refresh kind with all values set too false, cl args will set them true
+    let mut refkind = RefreshKind::nothing();
+    let mut show_cpu = false;
+
+    //
+    //Match args to set refresh kinds to true if matched
+    //
     let mut headers: Vec<(String, usize)> = Vec::new();
 
-    match args[1].as_str() {
-        
-        "cpu" => {
+    for arg in args.iter().skip(1) {
+        match arg.as_str() {
             
-            //Global CPU usage
+            "cpu" => {
 
-            let header = (String::from("CPU Usage"), 2);
+                refkind = refkind.with_cpu(CpuRefreshKind::nothing().with_cpu_usage());
+                headers.push((String::from("CPU Usage"), 2));
+                show_cpu = true;
+            }
 
-            let usages: Vec<String> = mysys::cpu::get_cpu_usages()
-                .iter().map(|c| format!("{:.2}", c)).collect();
 
-            let cpus: Vec<String> = usages.iter().enumerate()
-                .map(|(i, _)| {
-                    if i == 0 {
-                        format!("Global")
-                    } else {
-                        format!("CPU {}", i)
-                    }
-                })
-            .collect();
+            _ => {
 
-            table_items.push(cpus);
-            table_items.push(usages);
-            headers.push(header);
-
-            Table::new(table_items, headers).print();
-
-        }
-
-        _ => {
-
-            eprintln!("Unknown option: {}\nTry: cpu", args[1]);
+                eprintln!("Unknown option: {}\nTry: cpu", arg);
+                exit(1);
+            }
         }
     }
+
+    //refresh system with refkind values
+    sys.refresh_specifics(refkind);
+
+    //Refresh cpu usage again for accurate results if cpu is an arg
+    if show_cpu {
+        get_cpu_usages(&mut sys);
+    }
+    
+    //
+    //Format and Print table with system stats
+    //
+    let table_items = mysys::cpu::format_info(&sys);
+    Table::new(table_items, headers).print();
 }
 
 //
-// Print a nice square for some things
+//Functions
+//
+
+//
+//Print a nice square for some things
 //
 fn square(text: &str, width: usize) {
 
@@ -104,4 +109,20 @@ fn square(text: &str, width: usize) {
     println!("|{}{}{}|", " ".repeat(left), text, " ".repeat(right));
     line();
 
+}
+
+//
+//Refresh cpu usages after a time interval
+//
+fn get_cpu_usages(s: &mut System) {
+
+    // Need to refresh at least twice cpu state in a time interval
+    // If cpu is an argument then the first refresh is already done
+    
+    //Wait a bit
+    thread::sleep(Duration::from_millis(2000));
+    
+    // Refresh again
+    s.refresh_cpu_usage();
+    
 }
