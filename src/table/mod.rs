@@ -20,6 +20,9 @@ impl Table {
         
         //Obtain the largest vector
         let max_row = self.columns.iter().map(|c| c.len()).max().unwrap_or(0);
+        let offset: usize = if max_row % 2 == 0 {1} else {0};
+        let header_count = self.headers.len();
+        let len_mod: usize = if header_count == 1 {0} else {header_count};
         
         //
         //Print the table
@@ -29,7 +32,7 @@ impl Table {
             let col_sum: usize = self.col_widths.iter().sum();
             let table_len = col_sum + self.columns.len() * 2 + max_row%2;
 
-            println!("+{}+", "-".repeat(table_len));
+            println!("+{}+", "-".repeat(table_len + offset + len_mod));
             
             let mut cursor = 0;
             for (header, &span) in self.headers.iter().map(|(h,s)| (h,s)) {
@@ -40,7 +43,7 @@ impl Table {
                 cursor += span;
             }
             println!("|");
-            println!("+{}+", "-".repeat(table_len));
+            println!("+{}+", "-".repeat(table_len + offset + len_mod));
 
 
         //Print the columns
@@ -52,7 +55,7 @@ impl Table {
                 print!(" {} ", center(cell, width));
             }
             println!("|");
-            println!("+{}+", "-".repeat(2*max_row - 2 - max_row%2));
+            println!("+{}+", "-".repeat(table_len + offset + len_mod));
         }
 
     }

@@ -5,7 +5,7 @@
 mod mysys;
 mod table;
 
-use sysinfo::{System, RefreshKind, CpuRefreshKind};
+use sysinfo::{System, RefreshKind, CpuRefreshKind, MemoryRefreshKind};
 use std::{thread, time::Duration, process::exit};
 use std::env::args;
 use table::Table;
@@ -28,7 +28,7 @@ fn main() {
     //
     
     if args.len() < 2 {
-        println!("Usage: mysys [cpu]");
+        println!("Usage: mysys [cpu] [ram]");
         return;
     }
     
@@ -40,6 +40,7 @@ fn main() {
     //Add refresh kind with all values set too false, cl args will set them true
     let mut refkind = RefreshKind::nothing();
     let mut show_cpu = false;
+    let mut show_ram = false;
 
     //
     //Match args to set refresh kinds to true if matched
@@ -55,6 +56,11 @@ fn main() {
                 headers.push((String::from("CPU Usage"), 2));
                 show_cpu = true;
             }
+            "ram" => {
+                refkind = refkind.with_memory(MemoryRefreshKind::everything());
+                headers.push((String::from("Memory"),2));
+                show_ram = true;
+            }
 
 
             _ => {
@@ -67,16 +73,23 @@ fn main() {
 
     //refresh system with refkind values
     sys.refresh_specifics(refkind);
+    //
+    //Format Data
+    //
+    let mut table_items: Vec<Vec<String>> = Vec::new();
 
     //Refresh cpu usage again for accurate results if cpu is an arg
     if show_cpu {
         get_cpu_usages(&mut sys);
+        table_items.extend(mysys::format::format_cpu(&sys));
+    }
+    if show_ram {
+        table_items.extend(mysys::format::format_ram(&sys));
     }
     
     //
-    //Format and Print table with system stats
+    //Print table with system stats
     //
-    let table_items = mysys::format::format_info(&sys);
     Table::new(table_items, headers).print();
 }
 
