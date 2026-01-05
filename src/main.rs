@@ -76,7 +76,7 @@ fn main() {
     //
     //Format and Print table with system stats
     //
-    let table_items = mysys::cpu::format_info(&sys);
+    let table_items = mysys::format::format_info(&sys);
     Table::new(table_items, headers).print();
 }
 
