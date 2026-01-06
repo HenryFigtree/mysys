@@ -53,12 +53,10 @@ fn main() {
             "cpu" => {
 
                 refkind = refkind.with_cpu(CpuRefreshKind::nothing().with_cpu_usage());
-                headers.push((String::from("CPU Usage"), 2));
                 show_cpu = true;
             }
             "ram" => {
                 refkind = refkind.with_memory(MemoryRefreshKind::everything());
-                headers.push((String::from("Memory"),2));
                 show_ram = true;
             }
 
@@ -78,12 +76,16 @@ fn main() {
     //
     let mut table_items: Vec<Vec<String>> = Vec::new();
 
-    //Refresh cpu usage again for accurate results if cpu is an arg
+    //Refresh cpu usage again and format CPU
     if show_cpu {
+        headers.push((String::from("CPU Usage"), 2));
         get_cpu_usages(&mut sys);
         table_items.extend(mysys::format::format_cpu(&sys));
     }
+    //Format RAM
     if show_ram {
+
+        headers.push((String::from("Memory"),2));
         table_items.extend(mysys::format::format_ram(&sys));
     }
     
