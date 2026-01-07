@@ -63,10 +63,10 @@ pub fn format_disks(d: &Disk) -> Vec<Vec<String>> {
     let mut table_cols: Vec<Vec<String>> = Vec::new();
     let mut result = Vec::new();
     
-    result.push(format!("{:?}", d.name()));
+    result.push(format!("{}", d.name().to_string_lossy().into_owned()));
     result.push(d.kind().to_string());
-    result.push(format!("{:?}", d.mount_point()));
-    result.push(format!("{:?}", d.file_system()));
+    result.push(format!("{}", d.mount_point().to_string_lossy().into_owned()));
+    result.push(format!("{}", d.file_system().to_string_lossy().into_owned()));
     result.push(format!("{:.2} GiB", d.total_space() as f64 / 1024.0_f64.powi(3)));
     result.push(format!("{:.2} GiB", d.available_space() as f64 / 1024.0_f64.powi(3)));
 
