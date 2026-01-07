@@ -23,7 +23,7 @@ pub fn format_cpu(s: &System) -> Vec<Vec<String>> {
             if i == 0 {
                 format!("Global")
             } else {
-                format!("CPU {}", i)
+                format!("CPU {}", i - 1)
                    }
         })
           .collect();
