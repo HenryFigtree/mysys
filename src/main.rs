@@ -28,7 +28,7 @@ fn main() {
     //
     
     if args.len() < 2 {
-        println!("Usage: mysys [cpu] [ram]");
+        println!("Usage: mysys [cpu] [ram] [disks]");
         return;
     }
     
