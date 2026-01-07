@@ -1,7 +1,7 @@
 # Basic CLI system monitor written in rust.
 
 ## Features
-Cpu usage and RAM usage. Expected to become a full-fledged system monitor.
+Cpu usage, RAM usage, Disks information. Expected to become a full-fledged system monitor.
 
 ## Instalation
 ```bash
@@ -15,11 +15,11 @@ Make sure the directory is on PATH
 
 ## Usage
 ```bash
-mysys [cpu] [ram]
+mysys [cpu] [ram] [disks]
 ```
 For example:
 ```bash
-mysys cpu ram
+mysys cpu
 ```
-You can print cpu only, ram only or both, depending on the args you type.
+You can print cpu only, ram only, disks info only or all at once, depending on the args you type.
 
