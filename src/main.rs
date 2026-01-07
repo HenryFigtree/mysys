@@ -5,7 +5,7 @@
 mod mysys;
 mod table;
 
-use sysinfo::{System, RefreshKind, CpuRefreshKind, MemoryRefreshKind};
+use sysinfo::{System, RefreshKind, CpuRefreshKind, MemoryRefreshKind, Disks};
 use std::{thread, time::Duration, process::exit};
 use std::env::args;
 use table::Table;
@@ -41,6 +41,7 @@ fn main() {
     let mut refkind = RefreshKind::nothing();
     let mut show_cpu = false;
     let mut show_ram = false;
+    let mut show_disks = false;
 
     //
     //Match args to set refresh kinds to true if matched
@@ -58,6 +59,9 @@ fn main() {
             "ram" => {
                 refkind = refkind.with_memory(MemoryRefreshKind::everything());
                 show_ram = true;
+            }
+            "disks" => {
+                show_disks = true;
             }
 
 
@@ -82,11 +86,19 @@ fn main() {
         get_cpu_usages(&mut sys);
         table_items.extend(mysys::format::format_cpu(&sys));
     }
-    //Format RAM
+    //
     if show_ram {
 
         headers.push((String::from("Memory"),2));
         table_items.extend(mysys::format::format_ram(&sys));
+    }
+    //Create disks and format data
+    if show_disks {
+        let disks = Disks::new_with_refreshed_list();
+        for (i, disk) in disks.list().iter().enumerate() {
+            headers.push((format!("Disk {}", i), 2));
+            table_items.extend(mysys::format::format_disks(&disk));
+        }
     }
     
     //

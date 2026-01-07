@@ -22,7 +22,7 @@ impl Table {
         let max_row = self.columns.iter().map(|c| c.len()).max().unwrap_or(0);
         let offset: usize = if max_row % 2 == 0 {1} else {0};
         let header_count = self.headers.len();
-        let len_mod: usize = if header_count == 1 {0} else {header_count};
+        let len_mod = 2*(header_count - 1);
         
         //
         //Print the table
@@ -63,13 +63,19 @@ impl Table {
 
 fn center(s: &str,width: usize) -> String {
     let len = s.len();
+    let padding: usize;
+    let left: usize;
+    let right: usize;
+
     if len >= width {
-        return s.to_string();
+        padding = len - width;
+    }
+    else {
+        padding = width - len;
     }
 
-    let padding = width - len;
-    let left = padding/2;
-    let right = padding - left;
+    left = padding/2;
+    right = padding - left;
 
     format!("{}{}{}", " ".repeat(left), s, " ".repeat(right))
 
