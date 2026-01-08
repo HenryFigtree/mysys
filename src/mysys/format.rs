@@ -59,6 +59,23 @@ pub fn format_ram(s: &System) -> Vec<Vec<String>> {
     table_cols
 }
 
+pub fn disk_titles() -> Vec<Vec<String>> {
+    let mut table_cols: Vec<Vec<String>> = Vec::new();
+    let mut titles: Vec<String> = Vec::new();
+    
+    titles.push(String::from("Disk name"));
+    titles.push(String::from("Kind"));
+    titles.push(String::from("Mount point"));
+    titles.push(String::from("Filesystem"));
+    titles.push(String::from("Total space"));
+    titles.push(String::from("Available space"));
+
+    table_cols.push(titles);
+    table_cols
+
+
+}
+
 pub fn format_disks(d: &Disk) -> Vec<Vec<String>> {
     let mut table_cols: Vec<Vec<String>> = Vec::new();
     let mut result = Vec::new();
@@ -70,16 +87,6 @@ pub fn format_disks(d: &Disk) -> Vec<Vec<String>> {
     result.push(format!("{:.2} GiB", d.total_space() as f64 / 1024.0_f64.powi(3)));
     result.push(format!("{:.2} GiB", d.available_space() as f64 / 1024.0_f64.powi(3)));
 
-    let mut titles: Vec<String> = Vec::new();
-    
-    titles.push(String::from("Disk name"));
-    titles.push(String::from("Kind"));
-    titles.push(String::from("Mount point"));
-    titles.push(String::from("Filesystem"));
-    titles.push(String::from("Total space"));
-    titles.push(String::from("Available space"));
-
-    table_cols.push(titles);
     table_cols.push(result);
     table_cols
 

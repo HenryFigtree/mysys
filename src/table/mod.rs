@@ -21,29 +21,35 @@ impl Table {
         //Obtain the largest vector
         let max_row = self.columns.iter().map(|c| c.len()).max().unwrap_or(0);
         let offset: usize = if max_row % 2 == 0 {1} else {0};
+        let offset_i = offset as isize;
         let header_count = self.headers.len();
-        let len_mod = 2*(header_count - 1);
-        
+        let largest_header = self.headers.iter().map(|h| h.1).max().unwrap_or(0);
+        let col_num_mod = largest_header as isize - 2;
+        let len_mod = 2*(header_count as isize - 1) + col_num_mod;
+            
         //
         //Print the table
         //
 
         //Print Headers
-            let col_sum: usize = self.col_widths.iter().sum();
-            let table_len = col_sum + self.columns.len() * 2 + max_row%2;
+        let col_sum: usize = self.col_widths.iter().sum();
+        let table_len = col_sum + self.columns.len() * 2 + max_row%2;
+        let table_len_i = table_len as isize;
+        let table_len_sum = table_len_i + offset_i + len_mod;
+        let table_len_mod = table_len_sum as usize;
 
-            println!("+{}+", "-".repeat(table_len + offset + len_mod));
-            
-            let mut cursor = 0;
-            for (header, &span) in self.headers.iter().map(|(h,s)| (h,s)) {
-                let hcols: usize = self.col_widths[cursor .. cursor + span].iter().map(|w| w + 2).sum();
-                print!("|");
-                print!(" {} ", center(header, hcols - 1));
+        println!("+{}+", "-".repeat(table_len_mod));
+        
+        let mut cursor = 0;
+        for (header, &span) in self.headers.iter().map(|(h,s)| (h,s)) {
+            let hcols: usize = self.col_widths[cursor .. cursor + span].iter().map(|w| w + 2).sum();
+            print!("|");
+            print!(" {} ", center(header, hcols + span - 3));
 
-                cursor += span;
-            }
-            println!("|");
-            println!("+{}+", "-".repeat(table_len + offset + len_mod));
+            cursor += span;
+        }
+        println!("|");
+        println!("+{}+", "-".repeat(table_len_mod));
 
 
         //Print the columns
@@ -55,7 +61,7 @@ impl Table {
                 print!(" {} ", center(cell, width));
             }
             println!("|");
-            println!("+{}+", "-".repeat(table_len + offset + len_mod));
+            println!("+{}+", "-".repeat(table_len_mod));
         }
 
     }

@@ -95,8 +95,11 @@ fn main() {
     //Create disks and format data
     if show_disks {
         let disks = Disks::new_with_refreshed_list();
-        for (i, disk) in disks.list().iter().enumerate() {
-            headers.push((format!("Disk {}", i), 2));
+        let disk_cols = disks.list().len() + 1;
+        headers.push((String::from("Disks"), disk_cols));
+        table_items.extend(mysys::format::disk_titles());
+
+        for disk in disks.list() {
             table_items.extend(mysys::format::format_disks(&disk));
         }
     }
