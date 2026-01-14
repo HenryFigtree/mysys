@@ -5,7 +5,7 @@
 mod mysys;
 mod table;
 
-use sysinfo::{System, RefreshKind, CpuRefreshKind, MemoryRefreshKind, Disks};
+use sysinfo::{System, RefreshKind, CpuRefreshKind, MemoryRefreshKind, Disks, Networks};
 use std::{thread, time::Duration, process::exit};
 use std::env::args;
 use table::Table;
@@ -42,6 +42,7 @@ fn main() {
     let mut show_cpu = false;
     let mut show_ram = false;
     let mut show_disks = false;
+    let mut show_network = false;
 
     //
     //Match args to set refresh kinds to true if matched
@@ -62,6 +63,10 @@ fn main() {
             }
             "disks" => {
                 show_disks = true;
+            }
+
+            "network" => {
+                show_network = true;
             }
 
 
@@ -104,6 +109,12 @@ fn main() {
         }
     }
     
+    if show_network {
+        let networks = Networks::new_with_refreshed_list();
+        headers.push((String::from("Network"), networks.len() + 1));
+        table_items.extend(mysys::format::network_titles());
+        table_items.extend(mysys::format::format_networks(&networks));
+    }
     //
     //Print table with system stats
     //
