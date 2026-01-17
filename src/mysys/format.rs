@@ -146,4 +146,17 @@ pub fn format_networks(n: &Networks) -> Vec<Vec<String>> {
 
 }
 
+pub fn format_ip(n: &Networks) -> Vec<Vec<String>> {
+    let mut table_cols: Vec<Vec<String>> = Vec::new();
 
+    for (interface, network) in n.list() {
+        let mut result = Vec::new();
+        result.push(format!("{}", interface));
+        for ip in network.ip_networks() {
+            result.push(format!("{}", ip));
+        }
+        table_cols.push(result);
+    }
+
+    table_cols
+}

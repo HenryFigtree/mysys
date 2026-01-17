@@ -114,6 +114,8 @@ fn main() {
         headers.push((String::from("Network"), networks.len() + 1));
         table_items.extend(mysys::format::network_titles());
         table_items.extend(mysys::format::format_networks(&networks));
+        headers.push((String::from("IPs per interface"), networks.len()));
+        table_items.extend(mysys::format::format_ip(&networks));
     }
     //
     //Print table with system stats
