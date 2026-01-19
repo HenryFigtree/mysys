@@ -10,14 +10,25 @@ use std::{thread, time::Duration, process::exit};
 use std::env::args;
 use table::Table;
 
+fn help() {
+    println!("
+Usage: mysys [cpu] [ram] [disks] [network]
+You can write one, two or all arguments to display a table with the information requested.\n
+cpu: Displays the individual usage of your logical CPUs as reported to the OS as well as the sum of all of them in the Golbal CPU usage.\n
+ram: Displays physical ram information such as total, free, available memory as well as total, free and available memory.\n
+disks: Displays information about your disks. On Linux it appears it shows partitions and not disks e.g. it will show sda1, sda2, etc. instead of sda.\n
+network: Shows network data transfers in bytes and packets as well as other information like IP address, MAC address; all the information is per interface.\n
+        ")
+}
+
 fn main() {
     //
     //Welcome title
     //
 
     square("Welcome to MySys", 20);
-    println!("\n");
-    
+    print!("\n");
+    println!("This is a small system monitor that prints system stats from cpu, ram, disks and your networks");
     //
     //Check command line arguments: Usage mysys arg1
     //
@@ -28,7 +39,8 @@ fn main() {
     //
     
     if args.len() < 2 {
-        println!("Usage: mysys [cpu] [ram] [disks]");
+        println!("Usage: mysys [cpu] [ram] [disks] [network]");
+        println!("Use flag --help for more information");
         return;
     }
     
@@ -51,6 +63,10 @@ fn main() {
 
     for arg in args.iter().skip(1) {
         match arg.as_str() {
+            "--help" => {
+                help();
+                return;
+            }
             
             "cpu" => {
 
@@ -72,7 +88,7 @@ fn main() {
 
             _ => {
 
-                eprintln!("Unknown option: {}\nTry: cpu", arg);
+                eprintln!("Unknown option: {}\nTry: cpu ram disks network", arg);
                 exit(1);
             }
         }
