@@ -104,7 +104,6 @@ fn help() {
     println!("
 Usage: mysys [cpu] [ram] [disks] [network]
 You can write one, two or all arguments to display a table with the information requested.\n
-
 cpu: Displays the individual usage of your logical CPUs as reported to the OS as well as the sum of all of them in the Golbal CPU usage.\n
 ram: Displays physical ram information such as total, free, available memory as well as total, free and available memory.\n
 disks: Displays information about your disks. On Linux it appears it shows partitions and not disks e.g. it will show sda1, sda2, etc. instead of sda.\n
@@ -128,9 +127,6 @@ fn main() {
     // Add a new System |
     //------------------+
     let mut sys = System::new();
-
-    //Add refresh kind with all values set too false, cl args will set them true
-    let mut refkind = RefreshKind::nothing();
     
     //-------------+
     // Format Data |
@@ -140,16 +136,14 @@ fn main() {
 
     //Refresh cpu usage again and format CPU
     if config.cpu {
-        refkind = refkind.with_cpu(CpuRefreshKind::nothing().with_cpu_usage());
-        sys.refresh_specifics(refkind);
+        sys.refresh_specifics(RefreshKind::nothing().with_cpu(CpuRefreshKind::nothing().with_cpu_usage()));
         headers.push((String::from("CPU Usage"), 2));
         get_cpu_usages(&mut sys);
         table_items.extend(mysys::format::format_cpu(&sys));
     }
     //Format RAM
     if config.ram {
-        refkind = refkind.with_memory(MemoryRefreshKind::everything());
-        sys.refresh_specifics(refkind);
+        sys.refresh_specifics(RefreshKind::nothing().with_memory(MemoryRefreshKind::everything()));
         headers.push((String::from("Memory"),2));
         table_items.extend(mysys::format::format_ram(&sys));
     }
