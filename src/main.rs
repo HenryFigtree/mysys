@@ -10,79 +10,83 @@ use std::{thread, time::Duration, process::exit};
 use std::env::args;
 use table::Table;
 
-fn help() {
-    println!("
-Usage: mysys [cpu] [ram] [disks] [network]
-You can write one, two or all arguments to display a table with the information requested.\n
-cpu: Displays the individual usage of your logical CPUs as reported to the OS as well as the sum of all of them in the Golbal CPU usage.\n
-ram: Displays physical ram information such as total, free, available memory as well as total, free and available memory.\n
-disks: Displays information about your disks. On Linux it appears it shows partitions and not disks e.g. it will show sda1, sda2, etc. instead of sda.\n
-network: Shows network data transfers in bytes and packets as well as other information like IP address, MAC address; all the information is per interface.\n
-        ")
+struct Config {
+    cpu: bool,
+    ram: bool,
+    disks: bool,
+    network: bool,
 }
 
-fn main() {
-    //
-    //Welcome title
-    //
+//Configure Config according to args passed by user
+fn parse_args() -> Config {
+    let mut config = Config {
+        cpu: false,
+        ram: false,
+        disks: false,
+        network: false,
+    };
 
-    square("Welcome to MySys", 20);
-    print!("\n");
-    println!("This is a small system monitor that prints system stats from cpu, ram, disks and your networks");
-    //
-    //Check command line arguments: Usage mysys arg1
-    //
-    let args: Vec<String> = args().collect();
-    
-    //
-    //Check usage
-    //
-    
-    if args.len() < 2 {
-        println!("Usage: mysys [cpu] [ram] [disks] [network]");
-        println!("Use flag --help for more information");
-        return;
+    let mut args = args().skip(1);
+    let first = match args.next() {
+        Some(arg) => arg,
+        None => {
+            println!("Usage: mysys [cpu] [ram] [disks] [network]");
+            println!("Use flag --help for more information");
+            exit(0);
+        }
+    };
+
+    match first.as_str() {
+        "--help" => {
+            help();
+            exit(0);
+        }
+        
+        "cpu" => {
+
+            config.cpu = true;
+        }
+        "ram" => {
+            config.ram = true;
+        }
+        "disks" => {
+            config.disks = true;
+        }
+
+        "network" => {
+            config.network = true;
+        }
+
+
+        _ => {
+
+            eprintln!("Unknown option: \nTry: cpu ram disks network");
+            exit(1);
+        }
     }
-    
 
-    //
-    //Add a new System
-    //
-    let mut sys = System::new();
-    //Add refresh kind with all values set too false, cl args will set them true
-    let mut refkind = RefreshKind::nothing();
-    let mut show_cpu = false;
-    let mut show_ram = false;
-    let mut show_disks = false;
-    let mut show_network = false;
+    //first consumes first argument. match the rest.
 
-    //
-    //Match args to set refresh kinds to true if matched
-    //
-    let mut headers: Vec<(String, usize)> = Vec::new();
-
-    for arg in args.iter().skip(1) {
+    for arg in args{
         match arg.as_str() {
             "--help" => {
                 help();
-                return;
+                exit(0);
             }
             
             "cpu" => {
 
-                refkind = refkind.with_cpu(CpuRefreshKind::nothing().with_cpu_usage());
-                show_cpu = true;
+                config.cpu = true;
             }
             "ram" => {
-                refkind = refkind.with_memory(MemoryRefreshKind::everything());
-                show_ram = true;
+                config.ram = true;
             }
             "disks" => {
-                show_disks = true;
+                config.disks = true;
             }
 
             "network" => {
-                show_network = true;
+                config.network = true;
             }
 
 
@@ -93,28 +97,64 @@ fn main() {
             }
         }
     }
+    config
+}
 
-    //refresh system with refkind values
-    sys.refresh_specifics(refkind);
-    //
-    //Format Data
-    //
+fn help() {
+    println!("
+Usage: mysys [cpu] [ram] [disks] [network]
+You can write one, two or all arguments to display a table with the information requested.\n
+
+cpu: Displays the individual usage of your logical CPUs as reported to the OS as well as the sum of all of them in the Golbal CPU usage.\n
+ram: Displays physical ram information such as total, free, available memory as well as total, free and available memory.\n
+disks: Displays information about your disks. On Linux it appears it shows partitions and not disks e.g. it will show sda1, sda2, etc. instead of sda.\n
+network: Shows network data transfers in bytes and packets as well as other information like IP address, MAC address; all the information is per interface.\n
+        ")
+}
+
+fn main() {
+
+    //Check command line arguments: Usage mysys arg1
+    let config = parse_args();
+
+    //---------------+
+    // Welcome title |
+    //---------------+
+    square("Welcome to MySys", 20);
+    print!("\n");
+    println!("This is a small system monitor that prints system stats from cpu, ram, disks and your networks");
+
+    //------------------+
+    // Add a new System |
+    //------------------+
+    let mut sys = System::new();
+
+    //Add refresh kind with all values set too false, cl args will set them true
+    let mut refkind = RefreshKind::nothing();
+    
+    //-------------+
+    // Format Data |
+    //-------------+
+    let mut headers: Vec<(String, usize)> = Vec::new();
     let mut table_items: Vec<Vec<String>> = Vec::new();
 
     //Refresh cpu usage again and format CPU
-    if show_cpu {
+    if config.cpu {
+        refkind = refkind.with_cpu(CpuRefreshKind::nothing().with_cpu_usage());
+        sys.refresh_specifics(refkind);
         headers.push((String::from("CPU Usage"), 2));
         get_cpu_usages(&mut sys);
         table_items.extend(mysys::format::format_cpu(&sys));
     }
-    //
-    if show_ram {
-
+    //Format RAM
+    if config.ram {
+        refkind = refkind.with_memory(MemoryRefreshKind::everything());
+        sys.refresh_specifics(refkind);
         headers.push((String::from("Memory"),2));
         table_items.extend(mysys::format::format_ram(&sys));
     }
     //Create disks and format data
-    if show_disks {
+    if config.disks {
         let disks = Disks::new_with_refreshed_list();
         let disk_cols = disks.list().len() + 1;
         headers.push((String::from("Disks"), disk_cols));
@@ -124,8 +164,8 @@ fn main() {
             table_items.extend(mysys::format::format_disks(&disk));
         }
     }
-    
-    if show_network {
+    //Format network
+    if config.network {
         let networks = Networks::new_with_refreshed_list();
         headers.push((String::from("Network"), networks.len() + 1));
         table_items.extend(mysys::format::network_titles());
@@ -133,19 +173,13 @@ fn main() {
         headers.push((String::from("IPs per interface"), networks.len()));
         table_items.extend(mysys::format::format_ip(&networks));
     }
-    //
-    //Print table with system stats
-    //
+
+    //-------------------------------+
+    // Print table with system stats |
+    //-------------------------------+
     Table::new(table_items, headers).print();
 }
 
-//
-//Functions
-//
-
-//
-//Print a nice square for some things
-//
 fn square(text: &str, width: usize) {
 
     let line = || {
@@ -170,9 +204,9 @@ fn square(text: &str, width: usize) {
 
 }
 
-//
-//Refresh cpu usages after a time interval
-//
+//------------------------------------------+
+// Refresh cpu usages after a time interval |
+//------------------------------------------+
 fn get_cpu_usages(s: &mut System) {
 
     // Need to refresh at least twice cpu state in a time interval
