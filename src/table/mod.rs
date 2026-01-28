@@ -1,5 +1,3 @@
-//use crossterm::terminal::size;
-
 pub struct Table {
     columns: Vec<Vec<String>>,
     col_widths: Vec<usize>,
@@ -47,7 +45,7 @@ impl Table {
         
         let mut cursor = 0;
         let mut count = 0;
-        for (header, &span) in self.headers.iter().map(|(h,s)| (h,s)) {
+        for (header, span) in self.headers.iter() {
             let hcols: usize = self.col_widths[cursor .. cursor + span].iter().sum();
             let hwidth = self.header_widths[count];
             let padding = hcols + 3*span - hwidth - 1;
@@ -98,3 +96,4 @@ fn center(s: &str,width: usize) -> String {
     format!("{}{}{}", " ".repeat(padding.left), s, " ".repeat(padding.right))
 
 }
+
