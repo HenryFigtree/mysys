@@ -29,7 +29,7 @@ impl Table {
         Table{columns, col_widths, headers, header_widths}
     }
 
-    pub fn headers_to_string(&self) -> String {
+    pub(self) fn headers_to_string(&self) -> String {
         let mut headers_table = String::new();
         let mut cursor = 0;
         let mut count = 0;
