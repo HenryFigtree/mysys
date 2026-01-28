@@ -1,8 +1,15 @@
+//use crossterm::terminal::size;
+
 pub struct Table {
     columns: Vec<Vec<String>>,
     col_widths: Vec<usize>,
     headers: Vec<(String, usize)>,
     header_widths: Vec<usize>
+}
+
+struct Padding {
+    left: usize,
+    right: usize
 }
 
 impl Table {
@@ -72,20 +79,22 @@ impl Table {
 
 fn center(s: &str,width: usize) -> String {
     let len = s.len();
-    let padding: usize;
-    let left: usize;
-    let right: usize;
+    let pad: usize;
 
     if len >= width {
-        padding = len - width;
+        pad = len - width;
     }
     else {
-        padding = width - len;
+        pad = width - len;
     }
+    
+    let left = pad/2;
 
-    left = padding/2;
-    right = padding - left;
+    let padding = Padding {
+        left,
+        right: pad - left
+    };
 
-    format!("{}{}{}", " ".repeat(left), s, " ".repeat(right))
+    format!("{}{}{}", " ".repeat(padding.left), s, " ".repeat(padding.right))
 
 }
