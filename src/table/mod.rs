@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 pub struct Table {
     columns: Vec<Vec<String>>,
     col_widths: Vec<usize>,
@@ -27,6 +29,29 @@ impl Table {
         Table{columns, col_widths, headers, header_widths}
     }
 
+    pub fn headers_to_string(&self) -> String {
+        let mut headers_table = String::new();
+        let mut cursor = 0;
+        let mut count = 0;
+
+        for (header, span) in self.headers.iter() {
+            let hcols: usize = self.col_widths[cursor .. cursor + span].iter().sum();
+            let hwidth = self.header_widths[count];
+            let pad = hcols + 3*span - hwidth - 1;
+            let left = pad / 2;
+            let padding = Padding {
+                left,
+                right: pad - left
+            };
+
+            write!(headers_table, "|").unwrap();
+            write!(headers_table, "{}{}{}", " ".repeat(padding.left), header, " ".repeat(padding.right)).unwrap();
+            count += 1;
+            cursor += span;
+        }
+        headers_table
+    }
+
     //print table
     pub fn print(&self) {
         
@@ -42,20 +67,7 @@ impl Table {
         let table_len = col_sum + self.columns.len() * 3 - 1;
 
         println!("+{}+", "-".repeat(table_len));
-        
-        let mut cursor = 0;
-        let mut count = 0;
-        for (header, span) in self.headers.iter() {
-            let hcols: usize = self.col_widths[cursor .. cursor + span].iter().sum();
-            let hwidth = self.header_widths[count];
-            let padding = hcols + 3*span - hwidth - 1;
-            let left = padding / 2;
-            let right = padding - left;
-            print!("|");
-            print!("{}{}{}", " ".repeat(left), header, " ".repeat(right));
-            count += 1;
-            cursor += span;
-        }
+        print!("{}", self.headers_to_string());
         println!("|");
         println!("+{}+", "-".repeat(table_len));
 
@@ -96,4 +108,3 @@ fn center(s: &str,width: usize) -> String {
     format!("{}{}{}", " ".repeat(padding.left), s, " ".repeat(padding.right))
 
 }
-
