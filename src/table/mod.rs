@@ -52,6 +52,10 @@ impl Table {
         headers_table
     }
 
+    pub fn table_len(&self) -> usize {
+        self.headers_to_string().len()
+    }
+
     //print table
     pub fn print(&self) {
         
