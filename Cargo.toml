@@ -6,3 +6,4 @@ license = "MIT"
 
 [dependencies]
 sysinfo = "0.37.2"
+crossterm = "0.29.0"

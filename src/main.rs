@@ -6,6 +6,7 @@ mod mysys;
 mod table;
 
 use sysinfo::{System, RefreshKind, CpuRefreshKind, MemoryRefreshKind, Disks, Networks};
+use crossterm::terminal::size;
 use std::{thread, time::Duration, process::exit};
 use std::env::args;
 use table::Table;
@@ -171,7 +172,10 @@ fn main() {
     //-------------------------------+
     // Print table with system stats |
     //-------------------------------+
-    Table::new(table_items, headers).print();
+    let table = Table::new(table_items, headers);
+    if Terminal::size() < table.table_size() {
+
+    }
 }
 
 fn square(text: &str, width: usize) {
