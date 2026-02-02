@@ -7,7 +7,7 @@ mod table;
 
 use sysinfo::{System, RefreshKind, CpuRefreshKind, MemoryRefreshKind, Disks, Networks};
 use crossterm::terminal::size;
-use std::{thread, time::Duration, process::exit};
+use std::{error::Error, {thread, time::Duration, process::exit}};
 use std::env::args;
 use table::Table;
 
@@ -112,7 +112,7 @@ network: Shows network data transfers in bytes and packets as well as other info
         ")
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
 
     //Check command line arguments: Usage mysys arg1
     let config = parse_args();
@@ -173,9 +173,14 @@ fn main() {
     // Print table with system stats |
     //-------------------------------+
     let table = Table::new(table_items, headers);
-    if Terminal::size() < table.table_size() {
-
+    let (cols, _) = size()?;
+    if cols < table.table_len() {
+        println!("Not enough space to display the table")
     }
+    else {
+        table.print();
+    }
+    Ok(())
 }
 
 fn square(text: &str, width: usize) {
