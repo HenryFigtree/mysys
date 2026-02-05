@@ -14,6 +14,10 @@ struct Padding {
 
 impl Table {
     //New table
+    #[allow(dead_code)]
+    // This function creates a table from a complete set of columns and headers.
+    // Kept for fast table construction with already complete data.
+    // begin function is used instead for an incremental construction due to the limited horizontal space constraint
     pub fn new(columns: Vec<Vec<String>>, headers: Vec<(String, usize)>) -> Self {
         let col_widths = columns
             .iter()
@@ -27,6 +31,23 @@ impl Table {
 
 
         Table{columns, col_widths, headers, header_widths}
+    }
+
+    pub fn new_empty(max_width: u16) -> Self{
+        Table {
+            columns: Vec::new(),
+            col_widths: Vec::new(),
+            headers: Vec::new(),
+            header_widths: Vec::new()
+        }
+    }
+
+    pub fn append_column(column: Vec<String>) {
+        //TODO
+    }
+
+    pub fn append_columns(columns: Vec<Vec<String>>) {
+        //TODO
     }
 
     pub(self) fn headers_to_string(&self) -> String {
